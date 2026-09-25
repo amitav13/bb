@@ -185,6 +185,7 @@ interface ThreadDetailPromptAreaProps {
   environmentGoneStatus: "destroyed" | MachineRemovalStatus | null;
   environmentHostId?: string;
   environmentHost?: MachineLabelHost;
+  environmentMachineName?: string;
   environmentMachineProvider?: MachineProviderPresentation | null;
   environmentIcon?: IconName;
   environmentLabel?: string;
@@ -399,6 +400,7 @@ export function ThreadDetailPromptArea({
   environmentGoneStatus,
   environmentHostId,
   environmentHost,
+  environmentMachineName,
   environmentMachineProvider,
   environmentIcon,
   environmentLabel,
@@ -1684,6 +1686,7 @@ export function ThreadDetailPromptArea({
           environmentLabel={environmentLabel}
           environmentCompactLabel={environmentCompactLabel}
           environmentHost={environmentHost}
+          environmentMachineName={environmentMachineName}
           environmentIcon={environmentIcon}
           environmentProviderName={environmentProviderName}
           environmentMachineProvider={environmentMachineProvider}
@@ -1697,6 +1700,7 @@ export function ThreadDetailPromptArea({
       environmentHost,
       environmentIcon,
       environmentLabel,
+      environmentMachineName,
       environmentMachineProvider,
       environmentProviderName,
       onCreateNewThreadInEnvironment,

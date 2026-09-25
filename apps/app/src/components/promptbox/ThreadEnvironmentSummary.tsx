@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState, type ReactNode } from "react";
 import { OptionDisplay } from "@bb/shared-ui/option-display";
 import { copyToClipboardWithToast } from "@/lib/clipboard";
 import { Icon, type IconName } from "@bb/shared-ui/icon";
@@ -7,10 +7,17 @@ import { cn } from "@bb/shared-ui/lib/utils";
 import { CHROME_SUBTLE_ICON_BUTTON_FOREGROUND_CLASS } from "@bb/shared-ui/chrome-style-tokens";
 import type { WorkspaceCheckoutDisplay } from "@/lib/workspace-checkout-display";
 import {
+  MachineIcon,
   MachineLabel,
   type MachineLabelHost,
 } from "@/components/machines/MachineLabel";
 import type { MachineProviderPresentation } from "@/components/plugin/MachineProviderIcon";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@bb/shared-ui/popover";
+import { useIsCompactViewport } from "@bb/shared-ui/hooks/use-compact-viewport";
 
 const CHECKOUT_CHIP_BASE_CLASS_NAME =
   "flex min-w-0 flex-1 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground";
@@ -23,6 +30,7 @@ interface ThreadEnvironmentSummaryProps {
   environmentIcon?: IconName;
   environmentProviderName?: string;
   environmentHost?: MachineLabelHost;
+  environmentMachineName?: string;
   environmentMachineProvider?: MachineProviderPresentation | null;
   environmentCheckout?: WorkspaceCheckoutDisplay;
   onCreateNewThreadInEnvironment?: () => void;
@@ -35,10 +43,12 @@ export const ThreadEnvironmentSummary = memo(function ThreadEnvironmentSummary({
   environmentIcon,
   environmentProviderName,
   environmentHost,
+  environmentMachineName,
   environmentMachineProvider,
   environmentCheckout,
   onCreateNewThreadInEnvironment,
 }: ThreadEnvironmentSummaryProps) {
+  const isCompactViewport = useIsCompactViewport();
   if (
     !projectName &&
     !environmentLabel &&
@@ -50,6 +60,20 @@ export const ThreadEnvironmentSummary = memo(function ThreadEnvironmentSummary({
   }
 
   const checkoutCopyValue = environmentCheckout?.copyValue ?? null;
+  if (isCompactViewport) {
+    return (
+      <CompactThreadEnvironmentSummary
+        projectName={projectName}
+        environmentLabel={environmentLabel}
+        environmentIcon={environmentIcon}
+        environmentHost={environmentHost}
+        environmentMachineName={environmentMachineName}
+        environmentMachineProvider={environmentMachineProvider}
+        environmentCheckout={environmentCheckout}
+        onCreateNewThreadInEnvironment={onCreateNewThreadInEnvironment}
+      />
+    );
+  }
   return (
     <div className="flex min-w-0 max-w-full items-center gap-2 pr-1.5">
       {projectName ? (
@@ -157,3 +181,171 @@ export const ThreadEnvironmentSummary = memo(function ThreadEnvironmentSummary({
     </div>
   );
 });
+
+function copyCheckout(checkout: WorkspaceCheckoutDisplay, value: string) {
+  void copyToClipboardWithToast(value, {
+    successMessage: checkout.copySuccessMessage ?? "Value copied",
+    errorMessage: checkout.copyErrorMessage ?? "Failed to copy value",
+  });
+}
+
+function CompactThreadEnvironmentSummary({
+  projectName,
+  environmentLabel,
+  environmentIcon,
+  environmentHost,
+  environmentMachineName,
+  environmentMachineProvider,
+  environmentCheckout,
+  onCreateNewThreadInEnvironment,
+}: Omit<ThreadEnvironmentSummaryProps, "environmentCompactLabel">) {
+  const [open, setOpen] = useState(false);
+  const machineName = environmentHost?.name ?? environmentMachineName;
+  const showEnvironmentRow =
+    environmentLabel !== undefined && environmentLabel !== machineName;
+  const machineIcon = environmentHost ? (
+    <MachineIcon
+      host={environmentHost}
+      machineProvider={environmentMachineProvider}
+      className="size-4"
+    />
+  ) : (
+    <Icon name="Laptop" className="size-4 shrink-0" aria-hidden />
+  );
+  const environmentGlyph = environmentIcon ? (
+    <Icon
+      name={environmentIcon}
+      className={cn(
+        "size-4 shrink-0",
+        environmentIcon === "Loading" && "animate-spin",
+      )}
+      aria-hidden
+    />
+  ) : null;
+  const checkoutCopyValue = environmentCheckout?.copyValue ?? null;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label="Thread environment"
+          data-thread-environment-summary-trigger=""
+          className="inline-flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-1 text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
+        >
+          {projectName ? (
+            <Icon name="Folder" className="size-4 shrink-0" aria-hidden />
+          ) : null}
+          {machineName ? machineIcon : environmentGlyph}
+          {environmentCheckout ? (
+            <Icon name="GitBranch" className="size-3.5 shrink-0" aria-hidden />
+          ) : null}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent mobileTitle="Thread environment" className="w-72 p-1">
+        <div className="flex flex-col text-sm">
+          {projectName ? (
+            <EnvironmentDetailRow
+              icon={<Icon name="Folder" className="size-4 shrink-0" />}
+              label="Project"
+              value={projectName}
+            />
+          ) : null}
+          {machineName ? (
+            <EnvironmentDetailRow
+              icon={machineIcon}
+              label="Machine"
+              value={machineName}
+            />
+          ) : null}
+          {showEnvironmentRow ? (
+            <EnvironmentDetailRow
+              icon={environmentGlyph}
+              label="Environment"
+              value={environmentLabel}
+            />
+          ) : null}
+          {environmentCheckout ? (
+            <EnvironmentDetailRow
+              icon={<Icon name="GitBranch" className="size-4 shrink-0" />}
+              label="Branch"
+              value={environmentCheckout.label}
+              trailing={
+                checkoutCopyValue !== null ? (
+                  <Icon
+                    name="Copy"
+                    className="size-3.5 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                ) : null
+              }
+              onSelect={
+                checkoutCopyValue !== null
+                  ? () => {
+                      copyCheckout(environmentCheckout, checkoutCopyValue);
+                      setOpen(false);
+                    }
+                  : undefined
+              }
+            />
+          ) : null}
+          {onCreateNewThreadInEnvironment ? (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onCreateNewThreadInEnvironment();
+              }}
+              className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-state-hover"
+            >
+              <Icon name="MessageSquarePlus" className="size-4 shrink-0" />
+              <span>New thread in this environment</span>
+            </button>
+          ) : null}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function EnvironmentDetailRow({
+  icon,
+  label,
+  value,
+  trailing,
+  onSelect,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  trailing?: ReactNode;
+  onSelect?: () => void;
+}) {
+  const content = (
+    <>
+      <span className="w-24 shrink-0 text-muted-foreground">{label}</span>
+      <span className="flex min-w-0 flex-1 items-center gap-1.5">
+        {icon}
+        <span className="min-w-0 break-all">{value}</span>
+      </span>
+      {trailing}
+    </>
+  );
+  const rowClassName =
+    "flex min-h-11 items-center gap-2 rounded-md px-2 py-1.5 text-left";
+  if (!onSelect) {
+    return <div className={rowClassName}>{content}</div>;
+  }
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        rowClassName,
+        "cursor-pointer transition-colors hover:bg-state-hover",
+      )}
+    >
+      {content}
+    </button>
+  );
+}
