@@ -65,6 +65,9 @@ import {
   selectPrimaryHost,
   useHosts,
 } from "@/hooks/queries/host-queries";
+import { Icon } from "@bb/shared-ui/icon";
+import { Popover, PopoverContent, PopoverTrigger } from "@bb/shared-ui/popover";
+import { useIsCompactViewport } from "@bb/shared-ui/hooks/use-compact-viewport";
 import { useSystemConfig } from "@/hooks/queries/system-queries";
 import { useSystemMachineProviders } from "@/hooks/queries/machine-provider-queries";
 import { useHostDaemon } from "@/hooks/useHostDaemon";
@@ -287,6 +290,32 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
       ? "Loading models..."
       : "Submit (Enter)";
 
+  const isCompactViewport = useIsCompactViewport();
+  const environmentPickers = (
+    <>
+      {project ? (
+        <ProjectSelector
+          projects={project.projects}
+          value={project.value}
+          onChange={project.onChange}
+          allowNoProject={project.allowNoProject ?? false}
+          createProject={project.createProject}
+          disabled={project.disabled}
+          isLoading={project.isLoading}
+          showChevronWhenDisabled={project.showChevronWhenDisabled}
+          className="shrink-0"
+        />
+      ) : null}
+      <EnvironmentSlot
+        projectless={project?.value === null}
+        environment={modeConfig.environment}
+        worktree={modeConfig.worktree}
+        environmentProviderInputsSlot={modeConfig.environmentProviderInputsSlot}
+        machineProviderInputsSlot={modeConfig.machineProviderInputsSlot}
+      />
+    </>
+  );
+
   return (
     <div
       data-app-composer=""
@@ -331,33 +360,18 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
       />
       <div
         data-new-thread-footer=""
-        className="mt-1 flex select-none items-center justify-between gap-2 px-3.5 max-md:mt-0 max-md:grid max-md:grid-cols-2 max-md:gap-x-1 max-md:gap-y-0 max-md:pl-2 max-md:pr-2.5 max-md:[&_button]:h-11"
+        className="mt-1 flex select-none items-center justify-between gap-2 px-3.5 max-md:mt-0 max-md:pl-2 max-md:pr-2.5"
       >
-        <div className="flex min-w-0 flex-1 items-center gap-1 max-md:contents">
-          {project ? (
-            <ProjectSelector
-              projects={project.projects}
-              value={project.value}
-              onChange={project.onChange}
-              allowNoProject={project.allowNoProject ?? false}
-              createProject={project.createProject}
-              disabled={project.disabled}
-              isLoading={project.isLoading}
-              showChevronWhenDisabled={project.showChevronWhenDisabled}
-              className="shrink-0"
-            />
-          ) : null}
-          <EnvironmentSlot
-            projectless={project?.value === null}
-            environment={modeConfig.environment}
-            worktree={modeConfig.worktree}
-            environmentProviderInputsSlot={
-              modeConfig.environmentProviderInputsSlot
-            }
-            machineProviderInputsSlot={modeConfig.machineProviderInputsSlot}
-          />
-        </div>
-        <div className="flex shrink-0 items-center gap-2 max-md:contents">
+        {isCompactViewport ? (
+          <CompactEnvironmentPickers>
+            {environmentPickers}
+          </CompactEnvironmentPickers>
+        ) : (
+          <div className="flex min-w-0 flex-1 items-center gap-1">
+            {environmentPickers}
+          </div>
+        )}
+        <div className="flex shrink-0 items-center gap-2 max-md:[&_button]:h-11">
           <PermissionModePicker
             value={modeConfig.permission.value}
             options={modeConfig.permission.options}
@@ -372,6 +386,45 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
     </div>
   );
 });
+
+function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Environment settings"
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setOpen(true);
+            }
+          }}
+          className="flex h-11 min-w-0 flex-1 cursor-pointer items-center overflow-hidden rounded-md"
+        >
+          <div
+            inert
+            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-[40%] [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
+          >
+            {children}
+          </div>
+          <Icon
+            name="ChevronDown"
+            className="size-3.5 shrink-0 text-muted-foreground"
+            aria-hidden
+          />
+        </div>
+      </PopoverTrigger>
+      <PopoverContent mobileTitle="Environment" className="p-1">
+        <div className="flex flex-col items-start [&_button]:h-11">
+          {children}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 interface EnvironmentSlotProps {
   projectless: boolean;
