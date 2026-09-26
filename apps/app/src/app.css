@@ -408,6 +408,12 @@
       display: block;
       flex: 1 1 auto;
     }
+
+    [data-new-thread-environment-summary]
+      button:has([data-icon^="Git"])
+      span:not(:has([data-icon^="Git"])) {
+      display: none !important;
+    }
   }
 
   @container promptbox-shell (max-width: 34rem) {

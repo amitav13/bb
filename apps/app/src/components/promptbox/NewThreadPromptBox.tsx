@@ -402,11 +402,12 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
               setOpen(true);
             }
           }}
-          className="flex h-11 min-w-0 flex-1 cursor-pointer items-center overflow-hidden rounded-md"
+          className="flex h-11 min-w-0 cursor-pointer items-center gap-0.5 overflow-hidden rounded-md"
         >
           <div
             inert
-            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-[30%] [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
+            data-new-thread-environment-summary=""
+            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-24 [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
           >
             {children}
           </div>
