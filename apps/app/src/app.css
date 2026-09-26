@@ -414,6 +414,16 @@
       span:not(:has([data-icon^="Git"])) {
       display: none !important;
     }
+
+    [data-new-thread-environment-summary] [data-promptbox-compact-label] {
+      color: var(--color-subtle-foreground);
+    }
+
+    [data-new-thread-environment-summary]
+      [data-promptbox-compact-label]
+      > span {
+      color: var(--color-muted-foreground);
+    }
   }
 
   @container promptbox-shell (max-width: 34rem) {

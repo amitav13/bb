@@ -145,7 +145,7 @@ export function ProjectSelector({
               {triggerLabel}
             </span>
             <span className="min-w-0 truncate" data-promptbox-compact-label="">
-              {compactTriggerLabel}
+              <span>{compactTriggerLabel}</span>
             </span>
           </span>
           {disabled && !showChevronWhenDisabled ? null : (
