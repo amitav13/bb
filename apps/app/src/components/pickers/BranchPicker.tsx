@@ -361,15 +361,12 @@ export function BranchPicker({
                 name="GitMerge"
                 className={COARSE_POINTER_COMPACT_ICON_SIZE_SHRINK_CLASS}
               />
-              <span data-promptbox-mobile-hide="" className="contents">
-                <BranchPickerText
-                  label={triggerLabel}
-                  emphasizePlainLabel={triggerHasPlainBranchValue}
-                  className="truncate"
-                  compactAffixesInPromptbox
-                />
-              </span>
-              <span data-promptbox-mobile-label="">Branch</span>
+              <BranchPickerText
+                label={triggerLabel}
+                emphasizePlainLabel={triggerHasPlainBranchValue}
+                className="truncate"
+                compactAffixesInPromptbox
+              />
             </span>
           ) : (
             <span

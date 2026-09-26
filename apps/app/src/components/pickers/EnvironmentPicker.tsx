@@ -424,22 +424,16 @@ export function EnvironmentPickerUI({
               </>
             ) : (
               <>
-                <span
-                  className="min-w-0 truncate"
-                  data-promptbox-full-label=""
-                  data-promptbox-mobile-hide=""
-                >
+                <span className="min-w-0 truncate" data-promptbox-full-label="">
                   {selected.modeLabel}
                 </span>
                 <span
                   className="min-w-0 truncate"
                   data-promptbox-compact-label=""
                   data-promptbox-hide-tiny=""
-                  data-promptbox-mobile-hide=""
                 >
                   {selected.compactModeLabel}
                 </span>
-                <span data-promptbox-mobile-label="">Env.</span>
               </>
             )}
           </span>

@@ -398,17 +398,15 @@
     }
   }
 
-  [data-promptbox-mobile-label] {
-    display: none;
-  }
-
   @media (max-width: 767px) {
-    [data-new-thread-footer] [data-promptbox-mobile-hide] {
+    [data-new-thread-footer] [data-promptbox-full-label],
+    [data-new-thread-footer] [data-promptbox-hide-compact] {
       display: none !important;
     }
 
-    [data-new-thread-footer] [data-promptbox-mobile-label] {
-      display: inline;
+    [data-new-thread-footer] [data-promptbox-compact-label] {
+      display: block;
+      flex: 1 1 auto;
     }
   }
 

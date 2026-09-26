@@ -269,10 +269,7 @@ function WorktreeInputsControl({
               name="GitMerge"
               className={COARSE_POINTER_COMPACT_ICON_SIZE_SHRINK_CLASS}
             />
-            <span
-              data-promptbox-mobile-hide=""
-              className="flex min-w-0 items-baseline gap-1 truncate"
-            >
+            <span className="flex min-w-0 items-baseline gap-1 truncate">
               <span
                 data-promptbox-hide-compact=""
                 className="shrink-0 text-muted-foreground"
@@ -283,7 +280,6 @@ function WorktreeInputsControl({
                 {triggerValue}
               </span>
             </span>
-            <span data-promptbox-mobile-label="">Branch</span>
           </span>
           <Icon
             name="ChevronDown"
