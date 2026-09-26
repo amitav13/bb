@@ -2,6 +2,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -387,8 +388,77 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
   );
 });
 
+function useWordBoundaryLabels(ref: RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const root = ref.current;
+    const footer = root?.closest("[data-new-thread-footer]");
+    if (!root || !footer) return;
+    const canvas = document.createElement("canvas").getContext("2d");
+    const fit = () => {
+      const labels = [
+        ...root.querySelectorAll<HTMLElement>("[data-promptbox-compact-label]"),
+      ];
+      for (const label of labels) label.style.maxWidth = "";
+      for (const label of labels) {
+        const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
+        const range = document.createRange();
+        let top: number | null = null;
+        let left = 0;
+        let right = 0;
+        let truncated = false;
+        for (
+          let node = walker.nextNode();
+          node && !truncated;
+          node = walker.nextNode()
+        ) {
+          const text = node.textContent ?? "";
+          for (let index = 0; index < text.length; index++) {
+            range.setStart(node, index);
+            range.setEnd(node, index + 1);
+            const rect = range.getBoundingClientRect();
+            if (rect.width === 0) continue;
+            if (top === null) {
+              top = rect.top;
+              left = rect.left;
+            }
+            if (Math.abs(rect.top - top) >= 1) {
+              truncated = true;
+              break;
+            }
+            if (text[index]?.trim()) right = rect.right;
+          }
+        }
+        if (top === null) continue;
+        const width = right - left;
+        let ellipsis = 0;
+        if (truncated && canvas) {
+          canvas.font = getComputedStyle(label).font;
+          ellipsis = canvas.measureText("\u2026").width;
+        }
+        label.style.maxWidth = `${Math.ceil(width + ellipsis)}px`;
+      }
+    };
+    fit();
+    const resize = new ResizeObserver(fit);
+    resize.observe(footer);
+    const mutation = new MutationObserver(fit);
+    mutation.observe(root, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    void document.fonts.ready.then(fit);
+    return () => {
+      resize.disconnect();
+      mutation.disconnect();
+    };
+  }, [ref]);
+}
+
 function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const summaryRef = useRef<HTMLDivElement>(null);
+  useWordBoundaryLabels(summaryRef);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -405,6 +475,7 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
           className="flex h-11 min-w-0 cursor-pointer items-center gap-0.5 overflow-hidden rounded-md"
         >
           <div
+            ref={summaryRef}
             inert
             data-new-thread-environment-summary=""
             className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-24 [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
