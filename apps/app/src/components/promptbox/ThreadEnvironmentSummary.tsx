@@ -12,11 +12,7 @@ import {
   type MachineLabelHost,
 } from "@/components/machines/MachineLabel";
 import type { MachineProviderPresentation } from "@/components/plugin/MachineProviderIcon";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@bb/shared-ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@bb/shared-ui/popover";
 import { useIsCompactViewport } from "@bb/shared-ui/hooks/use-compact-viewport";
 
 const CHECKOUT_CHIP_BASE_CLASS_NAME =
@@ -226,22 +222,38 @@ function CompactThreadEnvironmentSummary({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label="Thread environment"
-          data-thread-environment-summary-trigger=""
-          className="inline-flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-1 text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
-        >
-          {projectName ? (
-            <Icon name="Folder" className="size-4 shrink-0" aria-hidden />
-          ) : null}
-          {machineName ? machineIcon : environmentGlyph}
-          {environmentCheckout ? (
-            <Icon name="GitBranch" className="size-3.5 shrink-0" aria-hidden />
-          ) : null}
-        </button>
-      </PopoverTrigger>
+      <div
+        data-thread-environment-summary-trigger=""
+        className="-ml-3.5 flex shrink-0 items-center"
+      >
+        {projectName ? (
+          <EnvironmentSummaryButton
+            icon={
+              <Icon name="Folder" className="size-4 shrink-0" aria-hidden />
+            }
+            ariaLabel={`Project ${projectName}`}
+          />
+        ) : null}
+        {machineName ? (
+          <EnvironmentSummaryButton
+            icon={machineIcon}
+            ariaLabel={`Machine ${machineName}`}
+          />
+        ) : environmentLabel ? (
+          <EnvironmentSummaryButton
+            icon={environmentGlyph}
+            ariaLabel={`Environment ${environmentLabel}`}
+          />
+        ) : null}
+        {environmentCheckout ? (
+          <EnvironmentSummaryButton
+            icon={
+              <Icon name="GitBranch" className="size-4 shrink-0" aria-hidden />
+            }
+            ariaLabel={`Branch ${environmentCheckout.label}`}
+          />
+        ) : null}
+      </div>
       <PopoverContent mobileTitle="Thread environment" className="w-72 p-1">
         <div className="flex flex-col text-sm">
           {projectName ? (
@@ -305,6 +317,27 @@ function CompactThreadEnvironmentSummary({
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function EnvironmentSummaryButton({
+  icon,
+  ariaLabel,
+}: {
+  icon: ReactNode;
+  ariaLabel: string;
+}) {
+  return (
+    <PopoverTrigger asChild>
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        title={ariaLabel}
+        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
+      >
+        {icon}
+      </button>
+    </PopoverTrigger>
   );
 }
 
