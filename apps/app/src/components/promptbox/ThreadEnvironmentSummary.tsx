@@ -251,9 +251,10 @@ function CompactThreadEnvironmentSummary({
             aria-label="New thread in this environment"
             title="New thread in this environment"
             onClick={onCreateNewThreadInEnvironment}
-            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
+            className="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
           >
             <Icon name="MessageSquarePlus" className="size-4" aria-hidden />
+            <span>New thread</span>
           </button>
         ) : null}
       </div>
