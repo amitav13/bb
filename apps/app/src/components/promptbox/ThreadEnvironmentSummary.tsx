@@ -219,39 +219,42 @@ function CompactThreadEnvironmentSummary({
     />
   ) : null;
   const checkoutCopyValue = environmentCheckout?.copyValue ?? null;
+  const summaryLabel = [
+    "Environment",
+    projectName,
+    machineName ?? environmentLabel,
+    environmentCheckout?.label,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <div
         data-thread-environment-summary-trigger=""
-        className="-ml-3.5 flex shrink-0 items-center"
+        className="-ml-2 flex shrink-0 items-center"
       >
-        {projectName ? (
-          <EnvironmentSummaryButton
-            icon={
-              <Icon name="Folder" className="size-4 shrink-0" aria-hidden />
-            }
-            ariaLabel={`Project ${projectName}`}
-          />
-        ) : null}
-        {machineName ? (
-          <EnvironmentSummaryButton
-            icon={machineIcon}
-            ariaLabel={`Machine ${machineName}`}
-          />
-        ) : environmentLabel ? (
-          <EnvironmentSummaryButton
-            icon={environmentGlyph}
-            ariaLabel={`Environment ${environmentLabel}`}
-          />
-        ) : null}
-        {environmentCheckout ? (
-          <EnvironmentSummaryButton
-            icon={
-              <Icon name="GitBranch" className="size-4 shrink-0" aria-hidden />
-            }
-            ariaLabel={`Branch ${environmentCheckout.label}`}
-          />
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={summaryLabel}
+            title={summaryLabel}
+            className="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
+          >
+            {machineName ? machineIcon : environmentGlyph}
+            <span>Environment</span>
+          </button>
+        </PopoverTrigger>
+        {onCreateNewThreadInEnvironment ? (
+          <button
+            type="button"
+            aria-label="New thread in this environment"
+            title="New thread in this environment"
+            onClick={onCreateNewThreadInEnvironment}
+            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
+          >
+            <Icon name="MessageSquarePlus" className="size-4" aria-hidden />
+          </button>
         ) : null}
       </div>
       <PopoverContent mobileTitle="Thread environment" className="w-72 p-1">
@@ -301,43 +304,9 @@ function CompactThreadEnvironmentSummary({
               }
             />
           ) : null}
-          {onCreateNewThreadInEnvironment ? (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onCreateNewThreadInEnvironment();
-              }}
-              className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-state-hover"
-            >
-              <Icon name="MessageSquarePlus" className="size-4 shrink-0" />
-              <span>New thread in this environment</span>
-            </button>
-          ) : null}
         </div>
       </PopoverContent>
     </Popover>
-  );
-}
-
-function EnvironmentSummaryButton({
-  icon,
-  ariaLabel,
-}: {
-  icon: ReactNode;
-  ariaLabel: string;
-}) {
-  return (
-    <PopoverTrigger asChild>
-      <button
-        type="button"
-        aria-label={ariaLabel}
-        title={ariaLabel}
-        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
-      >
-        {icon}
-      </button>
-    </PopoverTrigger>
   );
 }
 
