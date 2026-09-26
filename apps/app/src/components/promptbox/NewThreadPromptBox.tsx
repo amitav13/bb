@@ -400,42 +400,36 @@ function useWordBoundaryLabels(ref: RefObject<HTMLElement | null>) {
       ];
       for (const label of labels) label.style.maxWidth = "";
       for (const label of labels) {
+        const available = label.getBoundingClientRect().width;
+        if (label.scrollWidth <= Math.ceil(available)) continue;
         const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
         const range = document.createRange();
-        let top: number | null = null;
-        let left = 0;
+        let left: number | null = null;
         let right = 0;
-        let truncated = false;
-        for (
-          let node = walker.nextNode();
-          node && !truncated;
-          node = walker.nextNode()
-        ) {
+        const wordEnds: number[] = [];
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
           const text = node.textContent ?? "";
           for (let index = 0; index < text.length; index++) {
             range.setStart(node, index);
             range.setEnd(node, index + 1);
             const rect = range.getBoundingClientRect();
             if (rect.width === 0) continue;
-            if (top === null) {
-              top = rect.top;
-              left = rect.left;
+            left ??= rect.left;
+            if (text[index]?.trim()) {
+              right = rect.right;
+            } else if (right > left) {
+              wordEnds.push(right - left);
             }
-            if (Math.abs(rect.top - top) >= 1) {
-              truncated = true;
-              break;
-            }
-            if (text[index]?.trim()) right = rect.right;
           }
         }
-        if (top === null) continue;
-        const width = right - left;
-        let ellipsis = 0;
-        if (truncated && canvas) {
-          canvas.font = getComputedStyle(label).font;
-          ellipsis = canvas.measureText("\u2026").width;
-        }
-        label.style.maxWidth = `${Math.ceil(width + ellipsis)}px`;
+        if (!canvas) continue;
+        canvas.font = getComputedStyle(label).font;
+        const ellipsis = canvas.measureText("\u2026").width;
+        const fitted = Math.max(
+          ...wordEnds.filter((width) => width + ellipsis <= available),
+        );
+        if (!Number.isFinite(fitted)) continue;
+        label.style.maxWidth = `${Math.ceil(fitted + ellipsis)}px`;
       }
     };
     fit();
@@ -478,7 +472,7 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
             ref={summaryRef}
             inert
             data-new-thread-environment-summary=""
-            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-24 [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
+            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:shrink-[8] [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
           >
             {children}
           </div>

@@ -416,12 +416,6 @@
     }
 
     [data-new-thread-environment-summary] [data-promptbox-compact-label] {
-      display: -webkit-box !important;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1;
-      text-align: start;
-      white-space: normal !important;
-      overflow-wrap: anywhere;
       color: var(--color-subtle-foreground);
     }
 
