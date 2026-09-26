@@ -331,7 +331,7 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
       />
       <div
         data-new-thread-footer=""
-        className="mt-1 flex select-none items-center justify-between gap-2 px-3.5 max-md:mt-0 max-md:flex-wrap max-md:justify-start max-md:gap-x-1 max-md:gap-y-0 max-md:pl-2 max-md:pr-2.5 max-md:[&_button]:h-11"
+        className="mt-1 flex select-none items-center justify-between gap-2 px-3.5 max-md:mt-0 max-md:grid max-md:grid-cols-2 max-md:gap-x-1 max-md:gap-y-0 max-md:pl-2 max-md:pr-2.5 max-md:[&_button]:h-11"
       >
         <div className="flex min-w-0 flex-1 items-center gap-1 max-md:contents">
           {project ? (
@@ -357,7 +357,7 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
             machineProviderInputsSlot={modeConfig.machineProviderInputsSlot}
           />
         </div>
-        <div className="flex shrink-0 items-center gap-2 max-md:ml-auto">
+        <div className="flex shrink-0 items-center gap-2 max-md:contents">
           <PermissionModePicker
             value={modeConfig.permission.value}
             options={modeConfig.permission.options}
