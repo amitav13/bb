@@ -416,7 +416,11 @@
     }
 
     [data-new-thread-environment-summary] [data-promptbox-compact-label] {
-      color: var(--color-subtle-foreground);
+      color: color-mix(
+        in oklab,
+        var(--color-subtle-foreground) 75%,
+        transparent
+      );
     }
 
     [data-new-thread-environment-summary]

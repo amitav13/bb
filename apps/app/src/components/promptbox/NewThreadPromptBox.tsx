@@ -413,7 +413,7 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
           </div>
           <Icon
             name="ChevronDown"
-            className="size-3.5 shrink-0 text-subtle-foreground"
+            className="size-3.5 shrink-0 text-subtle-foreground/75"
             aria-hidden
           />
         </div>
