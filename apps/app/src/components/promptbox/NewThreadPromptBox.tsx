@@ -406,7 +406,7 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
         >
           <div
             inert
-            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-[40%] [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
+            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-[30%] [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
           >
             {children}
           </div>
