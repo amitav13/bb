@@ -448,11 +448,14 @@ function CheckoutInputsControl({
               name="GitMerge"
               className={COARSE_POINTER_COMPACT_ICON_SIZE_SHRINK_CLASS}
             />
-            <BranchPickerText
-              label={triggerLabel}
-              className="truncate"
-              compactAffixesInPromptbox
-            />
+            <span data-promptbox-mobile-hide="" className="contents">
+              <BranchPickerText
+                label={triggerLabel}
+                className="truncate"
+                compactAffixesInPromptbox
+              />
+            </span>
+            <span data-promptbox-mobile-label="">Branch</span>
           </span>
           <Icon
             name="ChevronDown"

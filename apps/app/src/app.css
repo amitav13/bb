@@ -398,6 +398,20 @@
     }
   }
 
+  [data-promptbox-mobile-label] {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    [data-new-thread-footer] [data-promptbox-mobile-hide] {
+      display: none !important;
+    }
+
+    [data-new-thread-footer] [data-promptbox-mobile-label] {
+      display: inline;
+    }
+  }
+
   @container promptbox-shell (max-width: 34rem) {
     [data-promptbox-shell] [data-promptbox-full-label],
     [data-promptbox-shell] [data-promptbox-hide-compact] {

@@ -141,12 +141,21 @@ export function ProjectSelector({
               className="size-3.5 shrink-0"
               aria-hidden
             />
-            <span className="min-w-0 truncate" data-promptbox-full-label="">
+            <span
+              className="min-w-0 truncate"
+              data-promptbox-full-label=""
+              data-promptbox-mobile-hide=""
+            >
               {triggerLabel}
             </span>
-            <span className="min-w-0 truncate" data-promptbox-compact-label="">
+            <span
+              className="min-w-0 truncate"
+              data-promptbox-compact-label=""
+              data-promptbox-mobile-hide=""
+            >
               {compactTriggerLabel}
             </span>
+            <span data-promptbox-mobile-label="">Project</span>
           </span>
           {disabled && !showChevronWhenDisabled ? null : (
             <Icon

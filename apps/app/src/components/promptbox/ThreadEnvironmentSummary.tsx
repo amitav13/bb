@@ -242,7 +242,7 @@ function CompactThreadEnvironmentSummary({
             className="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
           >
             {machineName ? machineIcon : environmentGlyph}
-            <span>Environment</span>
+            <span>Env.</span>
           </button>
         </PopoverTrigger>
         {onCreateNewThreadInEnvironment ? (
@@ -254,7 +254,7 @@ function CompactThreadEnvironmentSummary({
             className="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
           >
             <Icon name="MessageSquarePlus" className="size-4" aria-hidden />
-            <span>New thread</span>
+            <span>New thread in env.</span>
           </button>
         ) : null}
       </div>
