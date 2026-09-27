@@ -2,7 +2,6 @@ import {
   memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -388,71 +387,8 @@ const DefaultNewThreadComposer = memo(function DefaultNewThreadComposer({
   );
 });
 
-function useWordBoundaryLabels(ref: RefObject<HTMLElement | null>) {
-  useLayoutEffect(() => {
-    const root = ref.current;
-    const footer = root?.closest("[data-new-thread-footer]");
-    if (!root || !footer) return;
-    const canvas = document.createElement("canvas").getContext("2d");
-    const fit = () => {
-      const labels = [
-        ...root.querySelectorAll<HTMLElement>("[data-promptbox-compact-label]"),
-      ];
-      for (const label of labels) label.style.maxWidth = "";
-      for (const label of labels) {
-        const available = label.getBoundingClientRect().width;
-        if (label.scrollWidth <= Math.ceil(available)) continue;
-        const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
-        const range = document.createRange();
-        let left: number | null = null;
-        let right = 0;
-        const wordEnds: number[] = [];
-        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-          const text = node.textContent ?? "";
-          for (let index = 0; index < text.length; index++) {
-            range.setStart(node, index);
-            range.setEnd(node, index + 1);
-            const rect = range.getBoundingClientRect();
-            if (rect.width === 0) continue;
-            left ??= rect.left;
-            if (text[index]?.trim()) {
-              right = rect.right;
-            } else if (right > left) {
-              wordEnds.push(right - left);
-            }
-          }
-        }
-        if (!canvas) continue;
-        canvas.font = getComputedStyle(label).font;
-        const ellipsis = canvas.measureText("\u2026").width;
-        const fitted = Math.max(
-          ...wordEnds.filter((width) => width + ellipsis <= available),
-        );
-        if (!Number.isFinite(fitted)) continue;
-        label.style.maxWidth = `${Math.ceil(fitted + ellipsis)}px`;
-      }
-    };
-    fit();
-    const resize = new ResizeObserver(fit);
-    resize.observe(footer);
-    const mutation = new MutationObserver(fit);
-    mutation.observe(root, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-    void document.fonts.ready.then(fit);
-    return () => {
-      resize.disconnect();
-      mutation.disconnect();
-    };
-  }, [ref]);
-}
-
 function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const summaryRef = useRef<HTMLDivElement>(null);
-  useWordBoundaryLabels(summaryRef);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -469,10 +405,9 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
           className="flex h-11 min-w-0 cursor-pointer items-center gap-0.5 overflow-hidden rounded-md"
         >
           <div
-            ref={summaryRef}
             inert
             data-new-thread-environment-summary=""
-            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:shrink-[8] [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
+            className="pointer-events-none flex min-w-0 items-center [&_[data-icon=ChevronDown]]:hidden [&_[data-promptbox-project-control]]:max-w-24 [&_button]:min-w-0 [&_button:not([data-promptbox-project-control])]:shrink"
           >
             {children}
           </div>
