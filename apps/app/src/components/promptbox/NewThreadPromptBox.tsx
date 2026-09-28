@@ -65,7 +65,6 @@ import {
   selectPrimaryHost,
   useHosts,
 } from "@/hooks/queries/host-queries";
-import { Icon } from "@bb/shared-ui/icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@bb/shared-ui/popover";
 import { useIsCompactViewport } from "@bb/shared-ui/hooks/use-compact-viewport";
 import { useSystemConfig } from "@/hooks/queries/system-queries";
@@ -402,7 +401,7 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
               setOpen(true);
             }
           }}
-          className="flex h-11 min-w-0 cursor-pointer items-center gap-0.5 overflow-hidden rounded-md"
+          className="flex h-11 min-w-0 cursor-pointer items-center overflow-hidden rounded-md"
         >
           <div
             inert
@@ -411,11 +410,6 @@ function CompactEnvironmentPickers({ children }: { children: ReactNode }) {
           >
             {children}
           </div>
-          <Icon
-            name="ChevronDown"
-            className="size-3.5 shrink-0 text-subtle-foreground"
-            aria-hidden
-          />
         </div>
       </PopoverTrigger>
       <PopoverContent mobileTitle="Environment" className="p-1">
