@@ -178,13 +178,6 @@ export const ThreadEnvironmentSummary = memo(function ThreadEnvironmentSummary({
   );
 });
 
-function copyCheckout(checkout: WorkspaceCheckoutDisplay, value: string) {
-  void copyToClipboardWithToast(value, {
-    successMessage: checkout.copySuccessMessage ?? "Value copied",
-    errorMessage: checkout.copyErrorMessage ?? "Failed to copy value",
-  });
-}
-
 function CompactThreadEnvironmentSummary({
   projectName,
   environmentLabel,
@@ -230,10 +223,7 @@ function CompactThreadEnvironmentSummary({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <div
-        data-thread-environment-summary-trigger=""
-        className="-ml-2 flex shrink-0 items-center"
-      >
+      <div className="-ml-2 flex shrink-0 items-center">
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -296,7 +286,14 @@ function CompactThreadEnvironmentSummary({
               onSelect={
                 checkoutCopyValue !== null
                   ? () => {
-                      copyCheckout(environmentCheckout, checkoutCopyValue);
+                      void copyToClipboardWithToast(checkoutCopyValue, {
+                        successMessage:
+                          environmentCheckout.copySuccessMessage ??
+                          "Value copied",
+                        errorMessage:
+                          environmentCheckout.copyErrorMessage ??
+                          "Failed to copy value",
+                      });
                       setOpen(false);
                     }
                   : undefined
