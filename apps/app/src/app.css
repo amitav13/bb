@@ -524,7 +524,7 @@
     display: none;
   }
 
-  [data-follow-up-composer]:not([data-follow-up-composer-expanded])
+  [data-follow-up-composer]:not([data-follow-up-composer-footer-visible])
     [data-follow-up-composer-footer] {
     min-height: 0;
     max-height: 0;

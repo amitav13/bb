@@ -698,6 +698,11 @@ function FollowUpPromptBoxWithComposer({
       className="relative z-20"
       data-follow-up-composer=""
       data-follow-up-composer-expanded={isEditorExpanded ? "" : undefined}
+      data-follow-up-composer-footer-visible={
+        isCompactViewport && isEditorExpanded && environmentSummary !== null
+          ? ""
+          : undefined
+      }
       hidden={hasPendingInteraction}
       onBlurCapture={scheduleCollapseAfterFocusLoss}
       onFocusCapture={handleComposerFocus}

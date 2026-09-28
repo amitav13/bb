@@ -238,7 +238,6 @@ function CompactThreadEnvironmentSummary({
           <button
             type="button"
             aria-label={summaryLabel}
-            title={summaryLabel}
             className="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
           >
             {machineName ? machineIcon : environmentGlyph}
@@ -249,7 +248,6 @@ function CompactThreadEnvironmentSummary({
           <button
             type="button"
             aria-label="New thread in this environment"
-            title="New thread in this environment"
             onClick={onCreateNewThreadInEnvironment}
             className="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-state-hover hover:text-foreground"
           >
