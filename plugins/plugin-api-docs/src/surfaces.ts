@@ -405,6 +405,7 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "Migrate slots.commandPaletteAction to commands.register with the same fields; the old method remains a deprecated alias",
           "Read the current thread and project, and hide the row when it is unavailable",
           "Open one of the plugin's own thread side-panel tabs when a thread is on screen",
+          "Open one of the plugin's own composer typeaheads in the most recently focused composer",
         ],
         apiSymbols: [
           "PluginAppBuilder.commands",
@@ -503,12 +504,16 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "Read and rewrite the draft prompt from that callback",
           "Send the draft at a time the person picks, through the prompt box's own send — so a scheduled message keeps its attachments, its @-mentions, and on the new-thread screen the agent and environment chosen on screen",
           "Submit the draft with plugin-owned JSON that its dispatch hook can interpret and use to queue the message",
+          "Open a plugin-rendered typeahead where the @-mention menu appears, from its own + row or a command, and insert a whole prompt — mentions and attachments included — into an empty draft or at the caret",
         ],
         apiSymbols: [
           "ComposerPlusMenuItem",
           "ExperimentalComposerSubmitOptions",
+          "ComposerTypeaheadRegistration",
+          "ComposerTypeaheadApi",
+          "experimental_useComposerTypeahead",
         ],
-        firstParty: ["Drafts", "Send later"],
+        firstParty: ["Drafts", "Prompt Library", "Send later"],
       },
       {
         id: "provider-picker",

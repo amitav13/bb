@@ -2845,6 +2845,33 @@ providers need, the 50-image boundary is appropriate, and local image access
 should remain governed by the thread dispatch validator rather than an earlier
 plugin-specific check.
 
+## Composer typeaheads (`ComposerCustomization.experimental_typeaheads`, `experimental_useComposerTypeahead`, `PluginCommandContext.experimental_openComposerTypeahead`)
+
+**What it does.** `app.composer.customize({ experimental_typeaheads })`
+registers plugin-rendered pickers that the host mounts in the composer's
+typeahead container, the same positioned container the built-in @-mention and
+`/` menus use. The host keeps at most one typeahead open per composer, closes
+the built-in mention menu when one opens, adds a `+` menu row unless
+`plusMenu` is false, records the editor selection on open, closes the
+typeahead when focus returns to the editor or a pointer lands outside the
+composer, and restores the caret on `close()`. Inside the component,
+`experimental_useComposerTypeahead()` returns `{ view, draft, insert, close }`.
+`insert(input)` restores the whole `PromptInput[]` (attachments included)
+into an empty draft through the composer host, and otherwise inserts its text
+and @-mentions at the recorded caret, ignoring attachments.
+`PluginCommandContext.experimental_openComposerTypeahead(id)` opens one of the
+calling plugin's typeaheads in the most recently focused composer, so a
+rebindable command shortcut can open it. The bundled Prompt Library plugin is
+the first consumer.
+
+**Audit before stabilizing.** Decide whether the built-in mention and command
+menus should move onto the same contribution model instead of only sharing the
+container; whether compact layouts need a drawer presentation; whether
+`insert` into a non-empty draft should accept attachments; how "most recently
+focused composer" should behave with split panes and side chats; and whether
+the typeahead needs host-rendered chrome such as a search field and result
+list rather than a free-form component.
+
 ## Composer mention removal and successful submission subscriptions
 
 `PluginComposerApi.experimental_removeMention({ provider, id })` removes all matching mentions owned by the calling plugin from the current unsent draft, deletes their label text, rebases other mentions, and preserves attachments. It does not delete server records or alter sent messages.

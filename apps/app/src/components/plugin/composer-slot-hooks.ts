@@ -6,6 +6,7 @@ import {
   resolveComposerDraftObservers,
   resolveComposerEditorEffects,
   resolveComposerPlusMenuItems,
+  resolveComposerTypeaheads,
 } from "@/lib/plugin-slot-resolvers";
 import {
   EMPTY_PLUGIN_SLOT_SNAPSHOT,
@@ -67,6 +68,14 @@ export function useResolvedComposerPlusMenuItems(scopeKind: ComposerScopeKind) {
   return useResolvedComposerSlot(
     scopeKind,
     resolveComposerPlusMenuItems,
+    emptyList,
+  );
+}
+
+export function useResolvedComposerTypeaheads(scopeKind: ComposerScopeKind) {
+  return useResolvedComposerSlot(
+    scopeKind,
+    resolveComposerTypeaheads,
     emptyList,
   );
 }

@@ -21,6 +21,8 @@ Read the installed declarations for exact current signatures.
 - `ComposerRichTextSpec`
 - `ComposerStructuredDraft`
 - `ComposerView`
+- `ComposerTypeaheadApi`
+- `ComposerTypeaheadRegistration`
 - `DiffProps`
 - `DiffViewMode`
 - `ExperimentalAppPanel`

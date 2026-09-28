@@ -39,6 +39,9 @@ Read the installed SDK declarations for the exact current signatures.
 - `experimental_useFixedTabTarget`
 - `useComposer`
 - `useComposerView`
+- `experimental_useComposerTypeahead` — the composer an open
+  `experimental_typeaheads` component belongs to: `view`, `draft`, `insert`,
+  and `close`
 - `experimental_useSidebarThreads`
 - `experimental_useSidebarThreadActions`
 - `experimental_useSidebarThreadPullRequest`
@@ -225,6 +228,8 @@ Read the installed SDK declarations for the exact current signatures.
 - `ExperimentalComposerSelection`
 - `ComposerRichTextSpec`
 - `ComposerStructuredDraft`
+- `ComposerTypeaheadApi`
+- `ComposerTypeaheadRegistration`
 - `PluginComposerTextEffect`
 - `PluginComposerThreadRowStatus`
 - `PluginComposerMention`

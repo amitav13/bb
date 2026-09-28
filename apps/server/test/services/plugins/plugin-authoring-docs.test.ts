@@ -393,7 +393,12 @@ const FRONTEND_SLOT_PROP_FIELDS = {
   ],
   messageDirective: ["attributes", "source", "message", "openWorkspaceFile"],
   messageAction: ["threadId", "message", "selectedText", "openPanel"],
-  commandPaletteAction: ["threadId", "projectId", "openPanel"],
+  commandPaletteAction: [
+    "threadId",
+    "projectId",
+    "openPanel",
+    "experimental_openComposerTypeahead",
+  ],
   experimental_providerIcon: ["providerKind", "providerId", "icon"],
   experimental_timelineRenderer: [
     "row",

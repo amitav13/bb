@@ -18,6 +18,7 @@ import {
   type BbNavigate,
   type BranchesState,
   type ComposerCustomization,
+  type ComposerTypeaheadApi,
   type ComposerView,
   type ExperimentalAppOverlayRegistration,
   type ExperimentalQuestionFormHost,
@@ -219,10 +220,19 @@ export interface ComposerLog {
    * environment). Queued-message and side-chat scopes reject, as the app does.
    */
   selections: ExperimentalComposerSelection[];
+  /**
+   * Every prompt inserted through `experimental_useComposerTypeahead().insert`,
+   * in order. The harness composer has no caret, so an insert into a non-empty
+   * draft appends the prompt's text on a new line.
+   */
+  typeaheadInserts: Array<ComposerTypeaheadApi["draft"]>;
+  /** How many times the open typeahead closed, including after an insert. */
+  typeaheadCloseCount: number;
 }
 
 interface TestComposerStore {
   api: Omit<PluginComposerApi, "scope" | "text">;
+  typeahead: Pick<ComposerTypeaheadApi, "insert" | "close">;
   getAttachmentCount(): number;
   getScope(): PluginComposerScope;
   getText(): string;
@@ -1143,6 +1153,18 @@ const testPluginSdkApp = {
       };
     }, [composer, version]);
   },
+  experimental_useComposerTypeahead(): ComposerTypeaheadApi {
+    const composer = useSlotEnv("experimental_useComposerTypeahead").composer;
+    const view = testPluginSdkApp.useComposerView();
+    const [draft] = useState<ComposerTypeaheadApi["draft"]>(() => {
+      const text = composer.getText();
+      return text.trim() === "" ? [] : [{ type: "text", text, mentions: [] }];
+    });
+    return useMemo(
+      () => ({ view, draft, ...composer.typeahead }),
+      [composer, draft, view],
+    );
+  },
 } satisfies PluginSdkApp;
 
 interface PluginRuntimeHost {
@@ -1894,6 +1916,8 @@ export function renderSlot<
     focusCount: 0,
     submits: [],
     selections: [],
+    typeaheadInserts: [],
+    typeaheadCloseCount: 0,
   };
   const composerOwnership = { active: true };
   const submissionListeners = new Set<() => void>();
@@ -1905,6 +1929,21 @@ export function renderSlot<
     subscribe(listener) {
       composerListeners.add(listener);
       return () => composerListeners.delete(listener);
+    },
+    typeahead: {
+      insert(input) {
+        const text = input
+          .flatMap((chunk) => (chunk.type === "text" ? [chunk.text] : []))
+          .join("\n\n");
+        composerLog.typeaheadInserts.push(input);
+        commitComposerText(
+          composerText.trim() === "" ? text : `${composerText}\n${text}`,
+        );
+        composerLog.typeaheadCloseCount += 1;
+      },
+      close() {
+        composerLog.typeaheadCloseCount += 1;
+      },
     },
     api: {
       setText(next) {

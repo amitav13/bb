@@ -23,6 +23,7 @@ import { buildMarkdownMessageLinkRouting } from "@/components/ui/markdown-messag
 import type { MarkdownPreviewLinkHandler } from "@/components/ui/markdown-link";
 import { useThreadTimelineNavigation } from "@/components/thread/timeline/ThreadTimelineNavigationContext";
 import { usePluginId } from "@/components/plugin/plugin-context";
+import { useComposerTypeaheadApi } from "@/components/plugin/ComposerTypeaheadHost";
 import { useQuestionFormHost } from "@bb/shared-ui/question-form-host";
 import { definePluginApp } from "./plugin-app-definition";
 import { installDeprecatedAliases } from "./plugin-sdk-deprecated-aliases";
@@ -76,6 +77,7 @@ export const pluginSdkAppImplementation = installDeprecatedAliases(
     experimental_useFixedTabTarget,
     useComposer,
     useComposerView,
+    experimental_useComposerTypeahead: useComposerTypeaheadApi,
     useRealtime,
     useRealtimeConnectionState,
     useRpc,

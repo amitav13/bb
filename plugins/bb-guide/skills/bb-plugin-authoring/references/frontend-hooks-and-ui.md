@@ -112,7 +112,7 @@ composer.updateText((current) => `${current}\n\nPlease summarize this.`);
 Composer customizations:
 
 - Register with `app.composer.customize({ id, scopes?, actions?, plusMenu?,
-banners?, richText? })`. Omitted `scopes` means all thread, queued-message,
+banners?, richText?, experimental_typeaheads? })`. Omitted `scopes` means all thread, queued-message,
   side-chat, and new-thread composers.
 - `actions` and `banners` are plugin React components. Calls to
   `useComposer()` and `useComposerView()` inside them are bound to the composer
@@ -124,6 +124,20 @@ banners?, richText? })`. Omitted `scopes` means all thread, queued-message,
   `id`, `label`, optional `icon`, `description`, and `disabled`, plus
   `run({ composer, view })`. `disabled` accepts a boolean or a function of the
   current `ComposerView`.
+- `experimental_typeaheads` are plugin-rendered pickers the host opens in the
+  composer's typeahead container, where the built-in @-mention and `/` menus
+  appear (above or below the composer). Each `ComposerTypeaheadRegistration`
+  supplies `id`, `label`, optional `icon` and `description`, `plusMenu`
+  (defaults to true: a host-rendered `+` menu row that opens it), and
+  `component`. One typeahead is open per composer; opening one closes the
+  built-in mention menu. The component owns its focus, keys, and data, and
+  calls `experimental_useComposerTypeahead()` for `view`, `draft`, `insert`,
+  and `close`. `draft` is the `PromptInput[]` when it opened; `insert(input)`
+  restores the whole prompt into an empty draft (attachments included) or
+  inserts its text and @-mentions at the caret the composer had when the
+  typeahead opened; `close()` returns focus to that caret. Open it from a
+  command with `context.experimental_openComposerTypeahead(id)`, which targets
+  the most recently focused composer. Bundled example: `plugins/prompt-library`.
 - `richText.effects` rules return plain-text `{ from, to }` ranges and a class
   name from plugin CSS. Decorations are paint-only and never mutate the draft.
   `richText.onDraftChange(draft, view)` observes the debounced
