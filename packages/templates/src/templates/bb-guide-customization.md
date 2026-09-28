@@ -420,3 +420,8 @@ or with `bb settings general telemetryEnabled false`. The saved server-wide pref
 takes effect immediately and persists across restarts. SDK callers can use
 `system.updateGeneralSettings` with `telemetryEnabled`. `BB_TELEMETRY=false`
 always disables telemetry, even when the saved preference is enabled.
+
+Storage & retention is a default-disabled bundled plugin. Enable it
+with `bb plugin enable storage-retention`.
+Its sidebar panel and `bb storage` commands own retention policies and machine
+cleanup. See the plugin’s storage-retention skill for commands and limitations.
