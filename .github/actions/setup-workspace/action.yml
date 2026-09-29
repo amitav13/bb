@@ -24,10 +24,14 @@ runs:
         node-version: ${{ inputs.node-version }}
         pnpm-version: ${{ inputs.pnpm-version }}
     - uses: ./.github/actions/cache-workspace
+      id: cache
+      continue-on-error: true
       with:
         node-version: ${{ inputs.node-version }}
         cache-prefix: ${{ inputs.cache-prefix }}
         turbo-cache: ${{ inputs.turbo-cache }}
     - name: Install dependencies
       shell: bash
+      env:
+        CACHE_RESTORE_OUTCOME: ${{ steps.cache.outcome }}
       run: bash .github/actions/setup-workspace/install-dependencies.sh

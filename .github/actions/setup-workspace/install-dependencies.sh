@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ "${CACHE_RESTORE_OUTCOME:-success}" != "success" ]]; then
-  echo "::warning::Workspace cache restoration exceeded its budget; discarding partial restores."
+  echo "::warning::Workspace cache restoration failed or exceeded its budget; discarding partial restores."
   node --input-type=module -e 'import { rmSync } from "node:fs"; rmSync(".turbo/cache", { recursive: true, force: true }); rmSync(process.argv[1], { recursive: true, force: true });' "$(pnpm store path --silent)"
 fi
 
