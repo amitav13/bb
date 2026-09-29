@@ -1,6 +1,13 @@
 import { appendQuoteAndAttachmentsToDraft } from "@bb/client-core";
 import type { ComposerAttachment } from "@get-bb/plugin-sdk";
 import { createCoreComposerActions } from "@/lib/plugin-composer-handle";
+
+import {
+  readThreadCreationPlacement,
+  DEFAULT_THREAD_CREATION_PLACEMENT,
+} from "@/lib/thread-creation-placement";
+import { useRootComposePlacement } from "@/lib/root-compose-selection";
+import { ThreadCreationDestination } from "@/components/thread/ThreadCreationDestination";
 import { useInitialPromptDraft } from "@/components/promptbox/mentions/initial-prompt-draft";
 import {
   ThreadTitle,
@@ -147,7 +154,6 @@ import {
 import {
   useRootComposeForkSeed,
   useRootComposeProjectId,
-  useRootComposeSectionId,
   useSetRootComposeProjectId,
 } from "@/lib/root-compose-selection";
 import {
@@ -431,6 +437,7 @@ function readForkThreadCreateSeedFromLocationState(
 
 export function hasSingleUseRootComposeTargetState(state: unknown): boolean {
   return (
+    readThreadCreationPlacement(state) !== null ||
     readRootComposeSectionTargetFromLocationState(state) !== null ||
     readRootComposeEnvironmentTargetFromLocationState(state) !== null ||
     readForkThreadCreateSeedFromLocationState(state) !== null
@@ -520,14 +527,22 @@ export function LegacyProjectComposeRedirect({
   const location = useLocation();
   const navigate = useNavigate();
   const setRootComposeProjectId = useSetRootComposeProjectId();
+  const [, setPlacement] = useRootComposePlacement();
 
   useEffect(() => {
     setRootComposeProjectId(projectId);
+    setPlacement(DEFAULT_THREAD_CREATION_PLACEMENT);
     navigate(getRootComposeRoutePath(), {
       replace: true,
       state: location.state,
     });
-  }, [location.state, navigate, projectId, setRootComposeProjectId]);
+  }, [
+    location.state,
+    navigate,
+    projectId,
+    setRootComposeProjectId,
+    setPlacement,
+  ]);
 
   return <RouteLoadingSkeleton isBoundedPane={false} />;
 }
@@ -539,8 +554,7 @@ export function RootComposeView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const createThread = useCreateThread();
-  const [rootComposeSectionId, setRootComposeSectionId] =
-    useRootComposeSectionId();
+  const [placement, setPlacement] = useRootComposePlacement();
   const [lastCreatedThreadId, setLastCreatedThreadId] = useState<string | null>(
     null,
   );
@@ -567,12 +581,7 @@ export function RootComposeView() {
       const { sendAt, ...requestFields } = request;
       const createRequest =
         forkSeed === null
-          ? {
-              ...requestFields,
-              ...(rootComposeSectionId
-                ? { sectionId: rootComposeSectionId }
-                : {}),
-            }
+          ? requestFields
           : buildForkThreadRequest({
               ...forkSeed,
               input: request.input,
@@ -586,17 +595,14 @@ export function RootComposeView() {
               serviceTier: request.serviceTier,
             });
       if (createRequest === null) return;
-      const thread = await createThread.mutateAsync(
-        sendAt === undefined
-          ? createRequest
-          : {
-              ...createRequest,
-              ...(sendAt === undefined ? {} : { sendAt }),
-            },
-      );
+      const thread = await createThread.mutateAsync({
+        ...createRequest,
+        ...placement,
+        ...(sendAt === undefined ? {} : { sendAt }),
+      });
       setLastCreatedThreadId(thread.id);
       setForkSeed(null);
-      setRootComposeSectionId(null);
+      setPlacement(DEFAULT_THREAD_CREATION_PLACEMENT);
       if (shouldNavigateToCreatedThread) {
         navigate(
           getThreadRoutePath({
@@ -612,11 +618,12 @@ export function RootComposeView() {
       queryClient,
       navigate,
       navigateToThreadAfterCreate,
-      rootComposeSectionId,
+      placement,
       setForkSeed,
-      setRootComposeSectionId,
+      setPlacement,
     ],
   );
+
   const composerSeed = useMemo(
     () =>
       forkSeed === null
@@ -654,7 +661,6 @@ export function RootComposeView() {
           rootComposeProjectId={rootComposeProjectId}
           setForkSeed={setForkSeed}
           setRootComposeProjectId={setRootComposeProjectId}
-          setRootComposeSectionId={setRootComposeSectionId}
           setStartedComposing={setStartedComposing}
           startedComposing={startedComposing}
         />
@@ -670,7 +676,6 @@ interface RootComposeSurfaceProps {
   rootComposeProjectId: string;
   setForkSeed: (seed: ForkThreadCreateSeed | null) => void;
   setRootComposeProjectId: (projectId: string) => void;
-  setRootComposeSectionId: (sectionId: string | null) => void;
   setStartedComposing: (started: boolean) => void;
   startedComposing: boolean;
 }
@@ -682,7 +687,6 @@ function RootComposeSurface({
   rootComposeProjectId,
   setForkSeed,
   setRootComposeProjectId,
-  setRootComposeSectionId,
   setStartedComposing,
   startedComposing,
 }: RootComposeSurfaceProps) {
@@ -694,6 +698,7 @@ function RootComposeSurface({
   );
   const location = useLocation();
   const navigate = useNavigate();
+  const [placement, setPlacement] = useRootComposePlacement();
   const isPointerCoarse = usePointerCoarse();
   const quickCreateProject = useQuickCreateProjectController();
   const {
@@ -804,10 +809,19 @@ function RootComposeSurface({
     if (shouldStartComposingFromLocationState(location.state)) {
       setStartedComposing(true);
     }
-    if (sectionTarget?.kind === "set") {
-      setRootComposeSectionId(sectionTarget.sectionId);
-    } else if (sectionTarget?.kind === "clear") {
-      setRootComposeSectionId(null);
+    const targetPlacement = readThreadCreationPlacement(location.state);
+    if (targetPlacement !== null) {
+      setPlacement(targetPlacement);
+    } else if (
+      sectionTarget !== null ||
+      environmentTarget !== null ||
+      nextForkSeed !== null
+    ) {
+      setPlacement({
+        sectionId:
+          sectionTarget?.kind === "set" ? sectionTarget.sectionId : null,
+        pinned: false,
+      });
     }
     if (environmentTarget?.kind === "reuse") {
       seedEnvironmentSelectionValue(
@@ -845,8 +859,8 @@ function RootComposeSurface({
     setPermissionMode,
     setProviderModelReasoning,
     setRootComposeProjectId,
-    setRootComposeSectionId,
     setServiceTier,
+    setPlacement,
     setStartedComposing,
     stateInitialPrompt,
     stateInitialDraft,
@@ -2080,7 +2094,14 @@ function RootComposeSurface({
                   }
                 />
               ) : (
-                promptBox
+                <>
+                  <ThreadCreationDestination
+                    placement={placement}
+                    onChange={setPlacement}
+                    sections={sidebarNavigation?.sections ?? []}
+                  />
+                  {promptBox}
+                </>
               )}
             </RootComposeSecondaryContent>
           </AppNavigationHostProvider>
