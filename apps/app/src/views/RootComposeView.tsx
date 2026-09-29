@@ -7,7 +7,6 @@ import {
   DEFAULT_THREAD_CREATION_PLACEMENT,
 } from "@/lib/thread-creation-placement";
 import { useRootComposePlacement } from "@/lib/root-compose-selection";
-import { ThreadCreationDestination } from "@/components/thread/ThreadCreationDestination";
 import { useInitialPromptDraft } from "@/components/promptbox/mentions/initial-prompt-draft";
 import {
   ThreadTitle,
@@ -698,7 +697,7 @@ function RootComposeSurface({
   );
   const location = useLocation();
   const navigate = useNavigate();
-  const [placement, setPlacement] = useRootComposePlacement();
+  const [, setPlacement] = useRootComposePlacement();
   const isPointerCoarse = usePointerCoarse();
   const quickCreateProject = useQuickCreateProjectController();
   const {
@@ -2094,14 +2093,7 @@ function RootComposeSurface({
                   }
                 />
               ) : (
-                <>
-                  <ThreadCreationDestination
-                    placement={placement}
-                    onChange={setPlacement}
-                    sections={sidebarNavigation?.sections ?? []}
-                  />
-                  {promptBox}
-                </>
+                promptBox
               )}
             </RootComposeSecondaryContent>
           </AppNavigationHostProvider>

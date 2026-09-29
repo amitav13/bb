@@ -56,4 +56,3 @@ and general thread groups start unsectioned and unpinned. Environment rows
 reuse their environment and the containing group's placement. In Pinned,
 they retain the group's common underlying section for unpinning; mixed-section
 groups use no underlying section.
-The composer displays an editable destination before sending.

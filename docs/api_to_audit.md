@@ -3508,8 +3508,7 @@ complete draft snapshot instead of separate content and attachment getters.
 `PluginSidebarThreadActions.openNewThread` accepts `experimental_placement`
 with explicit `sectionId: string | null` and `pinned: boolean`. It overrides
 the legacy section option. Omission clears prior composer placement and uses
-the legacy section or the general thread list, unpinned. The composer shows
-and edits this destination and sends it with normal and scheduled
-creation. Audit pinned groups, custom sections, project/machine groups,
+the legacy section or the general thread list, unpinned. The composer sends
+this placement with normal and scheduled creation. Audit pinned groups, custom sections, project/machine groups,
 route transitions, draft recovery, and third-party sidebar compatibility
 before stabilizing this option.
