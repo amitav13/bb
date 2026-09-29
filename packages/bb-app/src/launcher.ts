@@ -16,6 +16,7 @@ import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { setTimeout as sleep } from "node:timers/promises";
 import {
   bbAppRuntimeVerifyTokens,
   claimBbAppRuntimeFile,
@@ -579,6 +580,7 @@ interface WaitForHostDaemonStatusArgs {
   expectedServerUrl: string;
   port: number;
   timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 interface RequestHostEnrollKeyArgs {
@@ -2345,12 +2347,16 @@ export async function waitForHostDaemonStatus(
   const statusUrl = `http://${BB_LOOPBACK_HOST}:${args.port}/status`;
 
   while (Date.now() <= deadline) {
+    args.signal?.throwIfAborted();
     if (args.childProcess && hasProcessExited(args.childProcess)) {
       throw new Error("Host daemon exited before becoming ready");
     }
     try {
       const response = await fetch(statusUrl, {
-        signal: AbortSignal.timeout(HEALTH_CHECK_REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.any([
+          AbortSignal.timeout(HEALTH_CHECK_REQUEST_TIMEOUT_MS),
+          ...(args.signal ? [args.signal] : []),
+        ]),
       });
       if (response.ok) {
         const status = hostDaemonStatusSchema.parse(await response.json());
@@ -2364,7 +2370,7 @@ export async function waitForHostDaemonStatus(
         }
       }
     } catch {}
-    await delayMilliseconds({ ms: HEALTH_CHECK_INTERVAL_MS });
+    await sleep(HEALTH_CHECK_INTERVAL_MS, undefined, { signal: args.signal });
   }
   throw new Error(
     `Timed out waiting for host daemon ${args.expectedHostId} to connect to ${expectedServerUrl} at ${statusUrl}`,
@@ -2823,14 +2829,38 @@ async function runHostDaemonOnly(args: RunHostDaemonOnlyArgs): Promise<void> {
     },
   );
 
+  const supervise = args.supervise && command.kind === "start";
+  const readiness = new AbortController();
+  const daemonExit = supervise
+    ? superviseHostDaemonProcess({
+        delayMilliseconds,
+        firstRun,
+        isShutdownRequested: () => shuttingDown,
+        now: Date.now,
+        startDaemon: () => {
+          currentRun = startDaemon();
+          return currentRun;
+        },
+      })
+    : firstRun.exit.then(({ result }) => result);
+
   try {
     try {
-      await waitForHostDaemonStatus({
-        childProcess: firstRun.childProcess,
+      const ready = waitForHostDaemonStatus({
+        childProcess: supervise ? null : firstRun.childProcess,
         expectedHostId,
         expectedServerUrl: serverUrl,
         port: args.context.daemonPort,
+        timeoutMs: supervise ? Infinity : HEALTH_CHECK_TIMEOUT_MS,
+        signal: readiness.signal,
       });
+      const exited = supervise
+        ? await Promise.race([ready.then(() => null), daemonExit])
+        : await ready.then(() => null);
+      if (exited !== null) {
+        process.exitCode = toExitCode(exited);
+        return;
+      }
     } catch {
       endStep(red("✗"), "Host daemon failed to start");
       log(" ", dim(`lock: ${args.context.daemonLockDir}`));
@@ -2860,21 +2890,9 @@ async function runHostDaemonOnly(args: RunHostDaemonOnlyArgs): Promise<void> {
     process.stdout.write("\n");
     log(" ", dim("Press Ctrl+C to stop"));
 
-    const result =
-      args.supervise && command.kind === "start"
-        ? await superviseHostDaemonProcess({
-            delayMilliseconds,
-            firstRun,
-            isShutdownRequested: () => shuttingDown,
-            now: Date.now,
-            startDaemon: () => {
-              currentRun = startDaemon();
-              return currentRun;
-            },
-          })
-        : (await firstRun.exit).result;
-    process.exitCode = toExitCode(result);
+    process.exitCode = toExitCode(await daemonExit);
   } finally {
+    readiness.abort();
     removeSignalForwarding();
   }
 }
